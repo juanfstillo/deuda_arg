@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "mora-credito-ar"
+version = "0.1.0"
+description = "Análisis de la mora crediticia en Argentina: datos y reproducibilidad"
+authors = ["Juan Stillo <juan@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.0"
+requests = "^2.30"
+matplotlib = "^3.8"
+seaborn = "^0.12"
+jupyterlab = "^4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
