@@ -10,7 +10,7 @@ Sub-preguntas:
 
 1. ¿Por qué se endeudan los hogares? (perfil de deuda, % sobre ingreso, evolución 2023–hoy)  
 2. ¿Por qué no pagan? (mora por tipo de entidad, por segmento de ingreso)  
-3. ¿El diseño regulatorio (eliminación del tope de interés, fin de REFIS, asimetría bancos/fintech) protege al sistema financiero o al deudor?
+3. ¿El diseño regulatorio (eliminación del tope de interés, fin de las LEFIs, asimetría bancos/fintech) protege al sistema financiero o al deudor?
 
 ## Marco teórico
 
