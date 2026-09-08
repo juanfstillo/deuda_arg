@@ -34,7 +34,29 @@ Esto es más útil como evidencia de **asimetría estructural** (una entidad tie
 ### 2.4 Policy feedback
 **Predicción:** el diseño regulatorio pasado cambia las expectativas y el comportamiento futuro de deudores y entidades, generando una trayectoria que se retroalimenta (no es un evento aislado sino una secuencia).
 
-**Dónde buscarla:** en la secuencia 2024→2025→2026: fin de Leliq/pases pasivos → LEFIs como puente → fin de LEFIs (jul-2025) → bancos pasan a gestionar liquidez con encajes más altos y mercado secundario (LECAP/BONCAP) → posible traslado a costo de fondeo y por ende a tasas activas → efecto sobre cuotas y mora. En paralelo, el salto de refinanciaciones voluntarias sobre stock de crédito a familias (3,2% vs. 1,6% seis meses antes, según prensa sobre series BCRA) coincide en el tiempo con este reacomodamiento de liquidez bancaria. La pregunta empírica: ¿el salto de refinanciaciones responde al fin de las LEFIs (canal de costo de fondeo) o es independiente (pura dinámica de ingresos/inflación, ver sección 3)? Esto requiere cruzar la serie de tasas activas con la fecha jul-2025 para ver si hay quiebre.
+**Dónde buscarla:** en la secuencia 2024→2025→2026: fin de Leliq/pases pasivos → LEFIs como puente → fin de LEFIs (jul-2025) → bancos pasan a gestionar liquidez con encajes más altos y mercado secundario (LECAP/BONCAP) → posible traslado a costo de fondeo y por ende a tasas activas → efecto sobre cuotas y mora.
+
+**Chequeo hecho (08/09/2026), con `bcra_api.py` contra series reales — serie 196 ("LEFI en cartera de entidades financieras") confirma el vencimiento exacto: el stock cae a 0 el 10/07/2025, tal como indicaba la prensa.** Comparando ventanas de BADLAR (id 7) y tasa de préstamos personales (id 144):
+
+| Ventana | BADLAR (prom.) | Tasa préstamos personales (prom.) |
+|---|---|---|
+| Pre (abr–jun 2025) | 32,7% | 72,1% |
+| Transición (jul 2025) | 32,5% | 69,8% |
+| Post inmediato (ago 2025) | 48,0% | 74,2% |
+| Post (sep 2025) | 48,4% | 81,7% |
+
+**Lectura honesta, no la que yo quería encontrar:** no hay un quiebre inmediato el 10/07/2025 — de hecho ambas tasas bajan levemente en julio. El salto grande llega recién en agosto-septiembre (BADLAR +48% relativo, préstamos personales +13% relativo vs. pre-jul). Eso debilita, no confirma, una lectura de "pass-through mecánico e inmediato" del fin de LEFIs.
+
+**Confusión a resolver antes de adjudicar esto a LEFIs:** las elecciones legislativas de medio término fueron el 26/10/2025, así que ago-sep 2025 es una ventana de presión cambiaria pre-electoral por definición, con o sin LEFIs de por medio. Cruzando con el tipo de cambio minorista (id 4) en las mismas ventanas:
+
+| Ventana | USD prom. | Var. vs. ventana anterior |
+|---|---|---|
+| Pre (abr–jun 2025) | $1.173 | — |
+| Transición (jul 2025) | $1.288 | +9,7% |
+| Post inmediato (ago 2025) | $1.344 | +4,4% |
+| Post (sep 2025) | $1.424 | +5,9% |
+
+**El resultado no es el confound limpio que esperaba, y eso es lo interesante.** Si todo fuera pura presión pre-electoral, tasas y tipo de cambio deberían acelerar juntos. Pero acá se desacoplan: el dólar subió *más* en julio (+9,7%, justo cuando BADLAR seguía plana) y *se desaceleró* en agosto (+4,4%, justo cuando BADLAR saltó +48%). Es decir, el salto de tasas no acompaña al salto cambiario mes a mes — llega con un mes de rezago respecto de él y coincide mejor con el vencimiento de LEFIs (10/07) que con el pico de devaluación (julio). Esto **no cierra el caso** a favor de policy feedback — un rezago de repricing bancario de ~1 mes es compatible con varias historias — pero sí debilita la hipótesis rival de "es solo nerviosismo pre-electoral", porque esa hipótesis predice que ambas series se muevan juntas y acá no lo hacen. **Pendiente real:** un análisis más fino (spread BADLAR sobre tasa de política monetaria, o un evento-estudio con datos diarios en vez de promedios mensuales) para separar mejor el rezago de repricing del ruido cambiario.
 
 ## 3. Hipótesis rival a descartar
 
@@ -51,7 +73,9 @@ Antes de adjudicar el patrón al diseño regulatorio, hay que descartar la expli
 ## 5. Qué falta verificar antes de dar esto por cerrado
 
 - [x] ~~Confirmar comunicación y fecha del fin de "REFIS"~~ — corregido: es LEFIs, no REFIS. Cronología confirmada: creación 2024 (sustituyen pases pasivos/Leliq), BCRA deja de ofrecerlas 10/07/2025, vencimiento 17/07/2025, canje por LECAPs/BONCAPs.
-- [ ] Confirmar si hay quiebre visible en la serie de tasas activas/BADLAR alrededor de jul-2025 (fin de LEFIs) — necesario para sostener el argumento de policy feedback de la sección 2.4.
+- [x] Confirmar si hay quiebre visible en la serie de tasas activas/BADLAR alrededor de jul-2025 (fin de LEFIs) — **hecho, ver sección 2.4**: hay un salto real en ago-sep 2025 (BADLAR +48% relativo, préstamos personales +13%), no inmediato al 10/07 sino con ~1 mes de rezago.
+- [x] Cruzar con tipo de cambio para descartar que sea solo ruido pre-electoral — **hecho, ver sección 2.4**: el dólar y las tasas se desacoplan mes a mes (dólar sube más en jul, tasas saltan en ago), lo que pesa *en contra* de la lectura "es solo la elección" y deja viva la hipótesis de policy feedback vía LEFIs, aunque sin cerrarla.
+- [ ] Análisis más fino (spread BADLAR sobre tasa de política monetaria, o evento-estudio con datos diarios) para consolidar la sección 2.4 antes de presentarla como evidencia firme.
 - [ ] Buscar 1-2 ejemplos más de comunicación oficial tipo "consejos para tomar un préstamo" (sección 2.3) para no apoyar blame avoidance en un solo caso.
 - [ ] Confirmar si existe asimetría normativa explícita bancos vs. fintech más allá de las LEFIs (ej. en Com. "A" 8026 o en el régimen de encajes post-LEFI) — o si la asimetría es solo de facto por alcance de supervisión.
 
