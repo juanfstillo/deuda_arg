@@ -36,11 +36,14 @@ Full 48-hour translation memos live in `general_proyect/docs/*_48_h_*.md` and `v
 
 A full pipeline already exists and executes end-to-end on sample data: `speech_analyzer/{scraper,preprocessor,analyzer,storage}.py`, `main.py` (CLI), `tests/test_analysis.py` (passing), output verified in `data/output/speech_metrics.csv`.
 
-**What's actually missing (the real next steps, not a from-scratch build):**
-1. `analyzer.py`'s `DEFAULT_KEYWORDS` currently has two flat, noisy categories (`blame_avoidance`, `strategic_conditionality`) with generic words (`deuda`, `fiscal`, `moneda`, `reforma`) that will produce false positives and don't reflect Weaver's three-strategy typology or Vreeland's conditionality-as-leverage claim. Needs rebuilding into 4 categories: the 3 Weaver strategies above + Vreeland conditionality, using the keyword mappings the memos already specify.
-2. `scraper.py` only fetches a single URL or reads local files — there is no actual crawler for a real corpus (Casa Rosada discursos, Ministerio de Economía comunicados). **Do not write this scraping/crawling logic without explicit confirmation** — hitting a real government site needs a deliberate choice about source, date range, and rate-limiting, not an assumption.
-3. No link yet between speech-metrics output and the veto-player variable (legislative seat share) that the Vreeland memo's testable hypothesis actually needs.
-4. Environment mismatch: `vreeland/` uses plain pip + `requirements.txt` against Python 3.9 locally; `general_proyect/` uses Poetry + Python 3.11. Not urgent to unify, but don't assume one env when working in the other.
+**Resolved since the initial handoff:**
+1. `analyzer.py`'s keyword taxonomy was rebuilt into 5 theory-grounded categories: Weaver's `passing_the_buck` / `scapegoating` / `redefining_issue_tina`, Vreeland's `fmi_conditionality` (kept distinct — expected to co-occur with `passing_the_buck` on IMF text, that's a real feature not a bug), and `responsabilizacion_individual` (Hood-style, seeded from the Aug-2026 episodes in `marco_teorico.md`). Accent-insensitive matching added via `preprocessor.fold_accents` without touching `normalize_text`'s accent-preserving contract (another test relies on that).
+2. A real crawler now exists: `speech_analyzer/gov_scraper.py` + `scrape_speeches.py`, covering all three confirmed sources — casarosada.gob.ar `/informacion/discursos` and `/informacion/conferencias` (Joomla, `div.item` listings), and argentina.gob.ar `/economia/noticias` (Drupal, `?page=N`). Selectors were derived from real fetched HTML, not guessed. Rate limits are real, not placeholders: 1.5s self-imposed on casarosada.gob.ar (its robots.txt sets none), exactly 10s on argentina.gob.ar (its robots.txt mandates `Crawl-delay: 10`). Scoped to Dec 2023–present (Milei term) per the confirmed decision — 219 discursos + 237 conferencias + 455 comunicados = 911 items total. Idempotent: `index.csv` tracks what's already downloaded, so a run can be interrupted/resumed safely. A full backfill costs ~90 minutes, almost entirely the mandated Ministry delay (455 × 10s).
+
+**Still open:**
+1. No link yet between speech-metrics output and the veto-player variable (legislative seat share) that the Vreeland memo's testable hypothesis actually needs.
+2. Environment mismatch: `vreeland/` uses plain pip + `requirements.txt` against Python 3.9 locally; `general_proyect/` uses Poetry + Python 3.11. Not urgent to unify, but don't assume one env when working in the other.
+3. Whether the scraped raw corpus (`vreeland/data/raw/gov_sources/`, ~911 text files) should be committed to git or kept local-only/regenerated — not yet decided.
 
 ## Conventions
 
