@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import re
 import time
 from dataclasses import dataclass
@@ -44,6 +45,25 @@ _MESES = {
     "julio": 7, "agosto": 8, "septiembre": 9, "setiembre": 9, "octubre": 10,
     "noviembre": 11, "diciembre": 12,
 }
+
+
+def _short_entry_id(raw: str, max_len: int = 60) -> str:
+    """Derive a filesystem-safe, stable id from a URL's last path segment.
+
+    Casarosada slugs carry a leading numeric Joomla content id ("51222-...")
+    which is short and already unique — use just that. Slugs with no such
+    prefix (argentina.gob.ar noticias) can run past Windows' ~260-char path
+    limit on their own (some casarosada titles are long enough that even
+    the numeric-id shortcut wouldn't have been needed for them, but noticia
+    slugs regularly are), so truncate and disambiguate with a short hash.
+    """
+    match = re.match(r"^(\d+)-", raw)
+    if match:
+        return match.group(1)
+    if len(raw) <= max_len:
+        return raw
+    digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:8]
+    return f"{raw[:max_len]}-{digest}"
 
 
 def _parse_casarosada_date(text: str) -> Optional[date]:
@@ -132,7 +152,7 @@ def iter_casarosada_section(
                 break
 
             href = link.get("href", "")
-            entry_id = href.rstrip("/").split("/")[-1]
+            entry_id = _short_entry_id(href.rstrip("/").split("/")[-1])
             yield ListingEntry(
                 source_type=source_type,
                 entry_id=entry_id,
@@ -192,7 +212,7 @@ def iter_ministerio_economia_noticias(
                 stop = True
                 break
 
-            entry_id = href.rstrip("/").split("/")[-1]
+            entry_id = _short_entry_id(href.rstrip("/").split("/")[-1])
             full_url = href if href.startswith("http") else f"https://www.argentina.gob.ar{href}"
             yield ListingEntry(
                 source_type="comunicado_economia",
